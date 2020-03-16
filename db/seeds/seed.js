@@ -30,7 +30,6 @@ exports.seed = function(knex) {
         .returning('*');
     })
     .then(articleRows => {
-      console.log(articleRows);
       /* 
     
           Your comment data is currently in the incorrect format and will violate your SQL schema. 
