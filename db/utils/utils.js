@@ -1,3 +1,5 @@
+const types = require('pg').types;
+
 exports.formatDates = (list, keyToConvert) => {
   return list.map(item => {
     const newItem = {};
@@ -34,4 +36,11 @@ exports.formatComments = (comments, articleRef) => {
       created_at: comment.created_at
     };
   });
+};
+
+exports.dbFormat = (req, res, next) => {
+  types.setTypeParser(20, val => {
+    return parseInt(val);
+  });
+  next();
 };
