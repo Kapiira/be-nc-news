@@ -59,7 +59,27 @@ describe('/api', () => {
       });
     });
   });
-  describe('/articles', () => {
+  describe.only('/articles', () => {
+    it('GET: 200 - Responds with array of article objects sorted by created_at desc', () => {
+      return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(res => {
+          expect(res.body.articles.length).to.equal(12);
+          expect(res.body.articles).to.be.sortedBy('created_at', {
+            descending: true
+          });
+          expect(res.body.articles[0]).to.have.all.keys(
+            'author',
+            'title',
+            'article_id',
+            'topic',
+            'created_at',
+            'votes',
+            'comment_count'
+          );
+        });
+    });
     describe('/:article_id', () => {
       it('GET: 200 - Responds with an article object', () => {
         return request(app)
