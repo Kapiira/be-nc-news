@@ -15,10 +15,29 @@ exports.selectArticleById = article_id => {
     });
 };
 
-exports.updateArticleById = (article_id, inc_votes) => {
+exports.updateArticleById = (article_id, body) => {
+  if (Object.keys(body).length !== 1) {
+    return Promise.reject({ code: 400 });
+  }
   return knex('articles')
-    .increment({ votes: inc_votes })
+    .increment({ votes: body.inc_votes })
     .where({ article_id })
     .returning('*')
-    .then(articles => articles[0]);
+    .then(articles => {
+      if (articles.length === 0) {
+        return Promise.reject({ code: 404, resource: 'Article' });
+      }
+      return articles[0];
+    });
+};
+
+exports.insertComment = (article_id, body) => {
+  return knex('comments')
+    .insert({
+      author: body.username,
+      body: body.body,
+      article_id
+    })
+    .returning('*')
+    .then(comments => comments[0]);
 };

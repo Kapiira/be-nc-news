@@ -123,6 +123,67 @@ describe('/api', () => {
               expect(res.body.message).to.equal('Article not found');
             });
         });
+        it('PATCH: 400 - Missing inc_votes in body', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({})
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal('bad user input');
+            });
+        });
+        it('PATCH: 400 - invalid inc_votes value', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: 'not-valid' })
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal('bad user input');
+            });
+        });
+        it('PATCH: 400 - Multiple keys sent in body request', () => {
+          return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes: 10, topic: 'random' })
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal('bad user input');
+            });
+        });
+        it('PATCH: 400 - invalid article_id', () => {
+          return request(app)
+            .patch('/api/articles/not-valid-id')
+            .send({ inc_votes: 10 })
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal('bad user input');
+            });
+        });
+        it('PATCH: 404 - article_id not found', () => {
+          return request(app)
+            .patch('/api/articles/0')
+            .send({ inc_votes: 10 })
+            .expect(404)
+            .then(res => {
+              expect(res.body.message).to.equal('Article not found');
+            });
+        });
+      });
+      describe('/comments', () => {
+        it('POST: 200 - returns the new comment object', () => {
+          return request(app)
+            .post('/api/articles/1/comments')
+            .send({ username: 'lurker', body: 'My First Comment' })
+            .expect(201)
+            .then(res => {
+              expect(res.body.comment).to.be.an('object');
+              expect(res.body.comment.article_id).to.equal(1);
+              expect(res.body.comment.body).to.equal('My First Comment');
+              expect(res.body.comment.comment_id).to.equal(19);
+              expect(res.body.comment.author).to.equal('lurker');
+              expect(res.body.comment.votes).to.equal(0);
+            });
+        });
       });
     });
   });
