@@ -79,6 +79,51 @@ describe('/api', () => {
             });
           });
       });
+      it('PATCH: 200 - Responds with the updated article object when you want to increment', () => {
+        return request(app)
+          .patch('/api/articles/2')
+          .send({ inc_votes: 10 })
+          .expect(200)
+          .then(res => {
+            expect(res.body.article).to.eql({
+              article_id: 2,
+              title: 'Sony Vaio; or, The Laptop',
+              body:
+                'Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.',
+              votes: 10,
+              topic: 'mitch',
+              author: 'icellusedkars',
+              created_at: '2014-11-16T12:21:54.171Z'
+            });
+          });
+      });
+      it('PATCH: 200 - Responds with the updated article object when you want to decrement', () => {
+        return request(app)
+          .patch('/api/articles/1')
+          .send({ inc_votes: -10 })
+          .expect(200)
+          .then(res => {
+            expect(res.body.article.votes).to.equal(90);
+          });
+      });
+      describe('ERRORS', () => {
+        it('GET: 400 - Bad article_id given and responds with an error message', () => {
+          return request(app)
+            .get('/api/articles/not-valid-id')
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal('bad user input');
+            });
+        });
+        it('GET: 404 - Valid article_id but no id found matching', () => {
+          return request(app)
+            .get('/api/articles/0')
+            .expect(404)
+            .then(res => {
+              expect(res.body.message).to.equal('Article not found');
+            });
+        });
+      });
     });
   });
 });
