@@ -16,9 +16,6 @@ exports.selectArticleById = article_id => {
 };
 
 exports.updateArticleById = (article_id, body) => {
-  if (Object.keys(body).length !== 1) {
-    return Promise.reject({ code: 400 });
-  }
   return knex('articles')
     .increment({ votes: body.inc_votes })
     .where({ article_id })
@@ -29,6 +26,13 @@ exports.updateArticleById = (article_id, body) => {
       }
       return articles[0];
     });
+};
+
+exports.selectCommentsByArticleId = article_id => {
+  return knex('comments')
+    .select('author', 'body', 'comment_id', 'created_at', 'votes')
+    .where({ article_id })
+    .orderBy('created_at', 'desc');
 };
 
 exports.insertComment = (article_id, body) => {

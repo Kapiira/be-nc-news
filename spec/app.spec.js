@@ -141,15 +141,6 @@ describe('/api', () => {
               expect(res.body.message).to.equal('bad user input');
             });
         });
-        it('PATCH: 400 - Multiple keys sent in body request', () => {
-          return request(app)
-            .patch('/api/articles/1')
-            .send({ inc_votes: 10, topic: 'random' })
-            .expect(400)
-            .then(res => {
-              expect(res.body.message).to.equal('bad user input');
-            });
-        });
         it('PATCH: 400 - invalid article_id', () => {
           return request(app)
             .patch('/api/articles/not-valid-id')
@@ -183,6 +174,87 @@ describe('/api', () => {
               expect(res.body.comment.author).to.equal('lurker');
               expect(res.body.comment.votes).to.equal(0);
             });
+        });
+        it('GET: 200 - Returns an array of comment objects sorted by created_at DESC', () => {
+          return request(app)
+            .get('/api/articles/1/comments')
+            .expect(200)
+            .then(res => {
+              expect(res.body.comments).to.be.an('array');
+              expect(res.body.comments[0]).to.eql({
+                comment_id: 2,
+                votes: 14,
+                created_at: '2016-11-22T12:36:03.389Z',
+                author: 'butter_bridge',
+                body:
+                  'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.'
+              });
+              expect(res.body.comments).to.be.sortedBy('created_at', {
+                descending: true
+              });
+            });
+        });
+        describe('ERRORS', () => {
+          it('POST: 400 - empty body sent', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({})
+              .expect(400)
+              .then(res => {
+                expect(res.body.message).to.equal('bad user input');
+              });
+          });
+          it('POST: 400 - only comment_body sent', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({ body: 'My First Comment' })
+              .expect(400)
+              .then(res => {
+                expect(res.body.message).to.equal('bad user input');
+              });
+          });
+          it('POST: 400 - only username sent', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({ username: 'lurker' })
+              .expect(400)
+              .then(res => {
+                expect(res.body.message).to.equal('bad user input');
+              });
+          });
+          it('POST: 404 - user does not exist in db', () => {
+            return request(app)
+              .post('/api/articles/1/comments')
+              .send({ body: 'My First Comment', username: 'non-existing-user' })
+              .expect(404)
+              .then(res => {
+                expect(res.body.message).to.equal('Resource not found');
+              });
+          });
+          it('POST: 400 - invalid article_id', () => {
+            return request(app)
+              .post('/api/articles/not-valid-id/comments')
+              .send({
+                body: 'My First Comment',
+                username: 'lurker'
+              })
+              .expect(400)
+              .then(res => {
+                expect(res.body.message).to.equal('bad user input');
+              });
+          });
+          it('POST: 404 - article_id not existing in db', () => {
+            return request(app)
+              .post('/api/articles/0/comments')
+              .send({
+                body: 'My First Comment',
+                username: 'lurker'
+              })
+              .expect(404)
+              .then(res => {
+                expect(res.body.message).to.equal('Resource not found');
+              });
+          });
         });
       });
     });
