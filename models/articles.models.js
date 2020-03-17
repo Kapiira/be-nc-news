@@ -28,11 +28,24 @@ exports.updateArticleById = (article_id, body) => {
     });
 };
 
-exports.selectCommentsByArticleId = article_id => {
+exports.selectCommentsByArticleId = (
+  article_id,
+  sort_by = 'created_at',
+  order = 'desc'
+) => {
+  if (order !== 'desc' && order !== 'asc') {
+    return Promise.reject({ code: 400 });
+  }
   return knex('comments')
     .select('author', 'body', 'comment_id', 'created_at', 'votes')
     .where({ article_id })
-    .orderBy('created_at', 'desc');
+    .orderBy(sort_by, order)
+    .then(comments => {
+      if (comments.length === 0) {
+        return Promise.reject({ code: 404, resource: 'Article' });
+      }
+      return comments;
+    });
 };
 
 exports.insertComment = (article_id, body) => {

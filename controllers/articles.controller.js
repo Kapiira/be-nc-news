@@ -25,7 +25,8 @@ exports.patchArticleById = (req, res, next) => {
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  selectCommentsByArticleId(article_id)
+  const { sort_by, order } = req.query;
+  selectCommentsByArticleId(article_id, sort_by, order)
     .then(comments => {
       res.send({ comments });
     })

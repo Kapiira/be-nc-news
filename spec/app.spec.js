@@ -194,6 +194,35 @@ describe('/api', () => {
               });
             });
         });
+        it('GET: 200 - Returns an array of comment objects sorted by created_at ASC', () => {
+          return request(app)
+            .get('/api/articles/1/comments?order=asc')
+            .expect(200)
+            .then(res => {
+              expect(res.body.comments).to.be.an('array');
+              expect(res.body.comments).to.be.sortedBy('created_at');
+            });
+        });
+        it('GET: 200 - Returns an array of comment objects sorted by comment_id ASC', () => {
+          return request(app)
+            .get('/api/articles/1/comments?order=asc&sort_by=comment_id')
+            .expect(200)
+            .then(res => {
+              expect(res.body.comments).to.be.an('array');
+              expect(res.body.comments).to.be.sortedBy('comment_id');
+            });
+        });
+        it('GET: 200 - Returns an array of comment objects sorted by author desc', () => {
+          return request(app)
+            .get('/api/articles/1/comments?order=desc&sort_by=author')
+            .expect(200)
+            .then(res => {
+              expect(res.body.comments).to.be.an('array');
+              expect(res.body.comments).to.be.sortedBy('author', {
+                descending: true
+              });
+            });
+        });
         describe('ERRORS', () => {
           it('POST: 400 - empty body sent', () => {
             return request(app)
@@ -253,6 +282,38 @@ describe('/api', () => {
               .expect(404)
               .then(res => {
                 expect(res.body.message).to.equal('Resource not found');
+              });
+          });
+          it('GET: 400 - invalid article_id', () => {
+            return request(app)
+              .get('/api/articles/not-valid-id/comments')
+              .expect(400)
+              .then(res => {
+                expect(res.body.message).to.equal('bad user input');
+              });
+          });
+          it('GET: 404 - article_id does not exist', () => {
+            return request(app)
+              .get('/api/articles/0/comments')
+              .expect(404)
+              .then(res => {
+                expect(res.body.message).to.equal('Article not found');
+              });
+          });
+          it('GET: 400 - invalid order value in query', () => {
+            return request(app)
+              .get('/api/articles/1/comments?order=not-valid')
+              .expect(400)
+              .then(res => {
+                expect(res.body.message).to.equal('bad user input');
+              });
+          });
+          it('GET: 400 - invalid sort_by column', () => {
+            return request(app)
+              .get('/api/articles/1/comments?sort_by=not-valid')
+              .expect(400)
+              .then(res => {
+                expect(res.body.message).to.equal('bad user input');
               });
           });
         });
