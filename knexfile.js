@@ -3,7 +3,7 @@ const ENV = process.env.NODE_ENV || 'development';
 const baseConfig = {
   client: 'pg',
   migrations: {
-    directory: './db/migrations'
+    directory: './db/'
   },
   seeds: {
     directory: './db/seeds'
