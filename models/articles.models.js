@@ -1,6 +1,14 @@
 const knex = require('../db/connection');
 
-exports.selectArticles = (sort_by = 'created_at', order = 'desc') => {
+exports.selectArticles = (
+  sort_by = 'created_at',
+  order = 'desc',
+  topic,
+  author
+) => {
+  if (order !== 'desc' && order !== 'asc') {
+    return Promise.reject({ code: 400 });
+  }
   return knex('articles')
     .select(
       'articles.author',
@@ -13,7 +21,23 @@ exports.selectArticles = (sort_by = 'created_at', order = 'desc') => {
     .count({ comment_count: 'comments.comment_id' })
     .leftJoin('comments', 'articles.article_id', 'comments.article_id')
     .orderBy(sort_by, order)
-    .groupBy('articles.article_id');
+    .groupBy('articles.article_id')
+    .modify(query => {
+      if (topic !== undefined) {
+        query.where('articles.topic', topic);
+      }
+    })
+    .modify(query => {
+      if (author !== undefined) {
+        query.where('articles.author', author);
+      }
+    })
+    .then(articles => {
+      if (articles.length === 0) {
+        return Promise.reject({ code: 404, resource: 'Article' });
+      }
+      return articles;
+    });
 };
 
 exports.selectArticleById = article_id => {

@@ -59,7 +59,7 @@ describe('/api', () => {
       });
     });
   });
-  describe.only('/articles', () => {
+  describe('/articles', () => {
     it('GET: 200 - Responds with array of article objects sorted by created_at desc', () => {
       return request(app)
         .get('/api/articles')
@@ -79,6 +79,89 @@ describe('/api', () => {
             'comment_count'
           );
         });
+    });
+    it('GET: 200 - Responds with array of article objects sorted by author desc', () => {
+      return request(app)
+        .get('/api/articles?sort_by=author')
+        .expect(200)
+        .then(res => {
+          expect(res.body.articles.length).to.equal(12);
+          expect(res.body.articles).to.be.sortedBy('author', {
+            descending: true
+          });
+        });
+    });
+    it('GET: 200 - Responds with array of article objects sorted by votes asc', () => {
+      return request(app)
+        .get('/api/articles?sort_by=votes&order=asc')
+        .expect(200)
+        .then(res => {
+          expect(res.body.articles.length).to.equal(12);
+          expect(res.body.articles).to.be.sortedBy('votes', {
+            descending: false
+          });
+        });
+    });
+    it('GET: 200 - Responds with array of article objects sorted by title asc', () => {
+      return request(app)
+        .get('/api/articles?sort_by=title&order=asc')
+        .expect(200)
+        .then(res => {
+          expect(res.body.articles.length).to.equal(12);
+          expect(res.body.articles).to.be.sortedBy('title', {
+            descending: false
+          });
+        });
+    });
+    it('GET: 200 - Responds with array of article filtered by topic', () => {
+      return request(app)
+        .get('/api/articles?topic=cats')
+        .expect(200)
+        .then(res => {
+          expect(res.body.articles.length).to.equal(1);
+        });
+    });
+    it('GET: 200 - Responds with array of article filtered by author', () => {
+      return request(app)
+        .get('/api/articles?author=rogersop')
+        .expect(200)
+        .then(res => {
+          expect(res.body.articles.length).to.equal(3);
+        });
+    });
+    describe('ERRORS', () => {
+      it('ERROR: 400 - sort_by column does not exist', () => {
+        return request(app)
+          .get('/api/articles?sort_by=non-existing')
+          .expect(400)
+          .then(res => {
+            expect(res.body.message).to.equal('bad user input');
+          });
+      });
+      it('ERROR: 400 - invalid order by value', () => {
+        return request(app)
+          .get('/api/articles?order=invalid')
+          .expect(400)
+          .then(res => {
+            expect(res.body.message).to.equal('bad user input');
+          });
+      });
+      it('ERROR: 404 - author not found', () => {
+        return request(app)
+          .get('/api/articles?author=non-existing-user')
+          .expect(404)
+          .then(res => {
+            expect(res.body.message).to.equal('Article not found');
+          });
+      });
+      it('ERROR: 404 - topic not found', () => {
+        return request(app)
+          .get('/api/articles?topic=non-existing-topic')
+          .expect(404)
+          .then(res => {
+            expect(res.body.message).to.equal('Article not found');
+          });
+      });
     });
     describe('/:article_id', () => {
       it('GET: 200 - Responds with an article object', () => {
@@ -336,6 +419,84 @@ describe('/api', () => {
                 expect(res.body.message).to.equal('bad user input');
               });
           });
+        });
+      });
+    });
+  });
+  describe('/comments', () => {
+    describe('/:comment_id', () => {
+      it('PATCH: 200 - Responds with the updated comment object when you want to increment', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({ inc_votes: 10 })
+          .expect(200)
+          .then(res => {
+            expect(res.body.comment).to.eql({
+              comment_id: 1,
+              article_id: 9,
+              body:
+                "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+              author: 'butter_bridge',
+              votes: 26,
+              created_at: '2017-11-22T12:36:03.389Z'
+            });
+          });
+      });
+      it('PATCH: 200 - Responds with the updated comment object when you want to decrement', () => {
+        return request(app)
+          .patch('/api/comments/2')
+          .send({ inc_votes: -4 })
+          .expect(200)
+          .then(res => {
+            expect(res.body.comment.votes).to.equal(10);
+          });
+      });
+      it('DELETE: 204 - with valid id', () => {
+        return request(app)
+          .delete('/api/comments/1')
+          .expect(204);
+      });
+      describe('ERRORS', () => {
+        it('PATCH: 400 - Missing inc_votes in body', () => {
+          return request(app)
+            .patch('/api/comments/1')
+            .send({})
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal('bad user input');
+            });
+        });
+        it('PATCH: 400 - invalid inc_votes value', () => {
+          return request(app)
+            .patch('/api/comments/1')
+            .send({ inc_votes: 'not-valid' })
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal('bad user input');
+            });
+        });
+        it('PATCH: 400 - invalid article_id', () => {
+          return request(app)
+            .patch('/api/comments/not-valid-id')
+            .send({ inc_votes: 10 })
+            .expect(400)
+            .then(res => {
+              expect(res.body.message).to.equal('bad user input');
+            });
+        });
+        it('PATCH: 404 - article_id not found', () => {
+          return request(app)
+            .patch('/api/comments/0')
+            .send({ inc_votes: 10 })
+            .expect(404)
+            .then(res => {
+              expect(res.body.message).to.equal('Article not found');
+            });
+        });
+        it('ERROR: 404 - with non existing id', () => {
+          return request(app)
+            .delete('/api/comments/0')
+            .expect(404);
         });
       });
     });
