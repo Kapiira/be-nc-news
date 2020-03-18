@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const apiRouter = require('./routers/api.router');
-const userErrors = require('./error_handling/user.errors');
+const { userErrors, pageNotFound } = require('./error_handling/user.errors');
 const psqlErrors = require('./error_handling/psql.errors');
 
 const { dbFormat } = require('./db/utils/utils');
@@ -13,5 +13,6 @@ app.use('/api', apiRouter);
 
 app.use(userErrors);
 app.use(psqlErrors);
+app.all('*', pageNotFound);
 
 module.exports = app;

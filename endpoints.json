@@ -9,8 +9,21 @@
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
+  "GET /api/users/:username": {
+    "description": "serves an object of a specific user",
+    "queries": [],
+    "exampleResponse": {
+      "topics": [
+        {
+          "username": "lurker",
+          "name": "do_nothing",
+          "avatar_url": "https: //www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png"
+        }
+      ]
+    }
+  },
   "GET /api/articles": {
-    "description": "serves an array of all topics",
+    "description": "serves an array of all articles",
     "queries": ["author", "topic", "sort_by", "order"],
     "exampleResponse": {
       "articles": [
@@ -19,9 +32,91 @@
           "topic": "cooking",
           "author": "weegembump",
           "body": "Text from the article..",
-          "created_at": 1527695953341
+          "created_at": 1527695953341,
+          "votes": 10
         }
       ]
     }
+  },
+  "GET /api/articles/:article_id": {
+    "description": "serves an object of asked article",
+    "queries": [],
+    "exampleResponse": {
+      "articles": {
+        "title": "Seafood substitutions are increasing",
+        "topic": "cooking",
+        "author": "weegembump",
+        "body": "Text from the article..",
+        "created_at": 1527695953341,
+        "votes": 10
+      }
+    }
+  },
+  "PATCH /api/articles/:article_id": {
+    "description": "update votes for a specific article and serves an object of asked article",
+    "body": { "inc_votes": "number-here (1)" },
+    "queries": [],
+    "exampleResponse": {
+      "articles": {
+        "title": "Seafood substitutions are increasing",
+        "topic": "cooking",
+        "author": "weegembump",
+        "body": "Text from the article..",
+        "created_at": 1527695953341,
+        "votes": 11
+      }
+    }
+  },
+  "GET /api/articles/:article_id/comments": {
+    "description": "serves an array of comment objects belonging to an article",
+    "queries": ["sort_by", "order"],
+    "exampleResponse": {
+      "comments": [
+        {
+          "comment_id": 2,
+          "article_id": 1,
+          "body": "Text from the comment",
+          "created_at": 1527695953341,
+          "votes": 10,
+          "author": "hannes"
+        }
+      ]
+    }
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "Posts a new comment and serves an object of the new comment",
+    "body": {
+      "username": "lurker",
+      "body": "My First Comment"
+    },
+    "queries": [],
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 2,
+        "article_id": 1,
+        "body": "Text from the comment",
+        "created_at": 1527695953341,
+        "votes": 10,
+        "author": "lurker"
+      }
+    }
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "Update votes column and serves an object of the updated comment",
+    "body": { "inc_votes": 4 },
+    "queries": [],
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 2,
+        "article_id": 1,
+        "body": "Text from the comment",
+        "created_at": 1527695953341,
+        "votes": 14,
+        "author": "lurker"
+      }
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "Deletes the comment and returns a status of 204"
   }
 }

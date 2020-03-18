@@ -16,6 +16,17 @@ after(() => {
 });
 
 describe('/api', () => {
+  it('Returns an object with all the endpoints and its description', () => {
+    return request(app)
+      .get('/api')
+      .expect(200)
+      .then(res => {
+        expect(res.body.endpoints).to.be.an('object');
+        expect(res.body.endpoints['DELETE /api/comments/:comment_id']).to.eql({
+          description: 'Deletes the comment and returns a status of 204'
+        });
+      });
+  });
   describe('/topics', () => {
     it('GET: 200 - Responds with all topics in an object', () => {
       return request(app)
@@ -499,6 +510,16 @@ describe('/api', () => {
             .expect(404);
         });
       });
+    });
+  });
+  describe('ERRORS', () => {
+    it('GET /api/not-valid-endpoint - 404 not found', () => {
+      return request(app)
+        .get('/api/not-valid-endpoint')
+        .expect(404)
+        .then(res => {
+          expect(res.body.message).to.equal('Page not found');
+        });
     });
   });
 });
