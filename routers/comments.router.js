@@ -3,8 +3,12 @@ const {
   patchCommentById,
   removeCommentById
 } = require('../controllers/comments.controller');
+const { methodNotFound } = require('../error_handling/user.errors');
 
-commentsRouter.patch('/:comment_id', patchCommentById);
-commentsRouter.delete('/:comment_id', removeCommentById);
+commentsRouter
+  .route('/:comment_id')
+  .patch(patchCommentById)
+  .delete(removeCommentById)
+  .all(methodNotFound);
 
 module.exports = commentsRouter;

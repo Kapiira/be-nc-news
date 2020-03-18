@@ -5,7 +5,8 @@ const {
 
 exports.patchCommentById = (req, res, next) => {
   const { comment_id } = req.params;
-  updateCommentById(comment_id, req.body)
+  const { inc_votes } = req.body;
+  updateCommentById(comment_id, inc_votes)
     .then(comment => {
       res.send({ comment });
     })

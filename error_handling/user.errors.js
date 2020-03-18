@@ -9,3 +9,7 @@ exports.userErrors = (err, req, res, next) => {
 exports.pageNotFound = (req, res) => {
   res.status(404).send({ message: 'Page not found' });
 };
+
+exports.methodNotFound = (req, res) => {
+  res.status(405).send({ message: 'method not allowed' });
+};

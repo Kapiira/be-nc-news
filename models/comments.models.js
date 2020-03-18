@@ -1,8 +1,8 @@
 const knex = require('../db/connection');
 
-exports.updateCommentById = (comment_id, body) => {
+exports.updateCommentById = (comment_id, inc_votes = 0) => {
   return knex('comments')
-    .increment({ votes: body.inc_votes })
+    .increment({ votes: inc_votes })
     .where({ comment_id })
     .returning('*')
     .then(comments => {

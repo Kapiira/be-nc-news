@@ -6,13 +6,23 @@ const {
   postComment,
   getArticles
 } = require('../controllers/articles.controller');
+const { methodNotFound } = require('../error_handling/user.errors');
 
-articlesRouter.get('/', getArticles);
+articlesRouter
+  .route('/')
+  .get(getArticles)
+  .all(methodNotFound);
 
-articlesRouter.get('/:article_id', getArticleById);
-articlesRouter.patch('/:article_id', patchArticleById);
+articlesRouter
+  .route('/:article_id')
+  .get(getArticleById)
+  .patch(patchArticleById)
+  .all(methodNotFound);
 
-articlesRouter.get('/:article_id/comments', getCommentsByArticleId);
-articlesRouter.post('/:article_id/comments', postComment);
+articlesRouter
+  .route('/:article_id/comments')
+  .get(getCommentsByArticleId)
+  .post(postComment)
+  .all(methodNotFound);
 
 module.exports = articlesRouter;
